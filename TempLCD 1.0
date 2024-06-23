@@ -1,0 +1,46 @@
+//Author: Nico Cwalina
+//6/23/2024
+
+
+#include <LiquidCrystal.h>
+
+// Initialize the library by associating any needed LCD interface pin
+const int rs = 15, en = 4, d4 = 21, d5 = 22, d6 = 18, d7 = 19;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+void setup() {
+  // Initialize serial communication at 115200 bits per second
+  Serial.begin(115200);
+
+  // Set the resolution to 12 bits (0-4096)
+  analogReadResolution(12);
+
+  // Set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  lcd.print("TempLCD Init");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  // Read the analog / millivolts value for pin 38
+  int analogVolts = analogReadMilliVolts(38);
+
+  // Calibration of the Thermistor model MCP9700/9700A
+  float temperatureC = (analogVolts - 500) / 10.0;
+  float temperatureF = ((temperatureC * 9) / 5) + 22; // +22 instead of +32 to calibrate the sensor to properly read the temperature (originally the temperature was about 10 degrees to high)
+  //This calibration error is most likely due to self heating of the sensor because of the 6uA power consumption.
+
+  // Print out the values you read to Serial Monitor
+  Serial.printf("\nTemperature: %.1fF", temperatureF);
+
+  // Display the temperature on the LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: ");
+  lcd.print(temperatureF);
+  lcd.print(" F");
+
+  // Wait for a second before reading again
+  delay(1000);
+}
