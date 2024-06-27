@@ -1,0 +1,81 @@
+#include <LiquidCrystal.h>
+
+// Initialize the library by associating any needed LCD interface pin
+const int rs = 15, en = 4, d4 = 21, d5 = 22, d6 = 18, d7 = 19;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+// Button pins
+const int buttonUp = 35;
+const int buttonLeft = 34;
+const int buttonRight = 38;
+const int buttonDown = 37;
+
+// Character position
+int posX = 0;
+int posY = 0;
+
+void setup() {
+  // Initialize serial communication at 115200 bits per second
+  Serial.begin(115200);
+
+  // Set up the LCD's number of columns and rows
+  lcd.begin(16, 2);
+  lcd.print("TempLCD Init");
+  delay(2000);
+  lcd.clear();
+
+  // Initialize button pins as inputs with pull-up resistors
+  pinMode(buttonUp, INPUT);
+  pinMode(buttonLeft, INPUT);
+  pinMode(buttonRight, INPUT);
+  pinMode(buttonDown, INPUT);
+
+  Serial.println("Setup complete. Testing buttons...");
+}
+
+void loop() {
+  int upState = digitalRead(buttonUp);
+  int leftState = digitalRead(buttonLeft);
+  int rightState = digitalRead(buttonRight);
+  int downState = digitalRead(buttonDown);
+
+  // Debugging prints for button states
+  Serial.print("Up: ");
+  Serial.print(upState);
+  Serial.print(" | Left: ");
+  Serial.print(leftState);
+  Serial.print(" | Right: ");
+  Serial.print(rightState);
+  Serial.print(" | Down: ");
+  Serial.println(downState);
+
+  // Check for button presses and update character position
+  if (upState == LOW) {
+    posY = max(posY - 1, 0);
+    Serial.println("UP pressed");
+    delay(200); // Debounce delay
+  }
+  if (leftState == LOW) {
+    posX = max(posX - 1, 0);
+    Serial.println("LEFT pressed");
+    delay(200); // Debounce delay
+  }
+  if (rightState == LOW) {
+    posX = min(posX + 1, 15);
+    Serial.println("RIGHT pressed");
+    delay(200); // Debounce delay
+  }
+  if (downState == LOW) {
+    posY = min(posY + 1, 1);
+    Serial.println("DOWN pressed");
+    delay(200); // Debounce delay
+  }
+
+  // Clear the LCD and display the character at the new position
+  lcd.clear();
+  lcd.setCursor(posX, posY);
+  lcd.write(0xFF); // Full block character
+
+  // Wait before the next loop iteration
+  delay(100);
+}
