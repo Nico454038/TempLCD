@@ -1,0 +1,119 @@
+#include <LiquidCrystal.h>
+
+// Initialize the library by associating any needed LCD interface pin
+const int rs = 15, en = 4, d4 = 21, d5 = 22, d6 = 18, d7 = 19;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+// Button pins for movement
+const int buttonUp = 35;
+const int buttonLeft = 34;
+const int buttonRight = 38;
+const int buttonDown = 37;
+
+// Button pins for mode switching
+const int buttonMode1 = 32; // Pin for Temperature mode
+const int buttonMode2 = 33; // Pin for Box-moving minigame
+
+// Character position for minigame
+int posX = 0;
+int posY = 0;
+
+// Modes
+enum Mode { TEMPERATURE, MINIGAME };
+Mode currentMode = TEMPERATURE;
+
+void setup() {
+  // Initialize serial communication at 115200 bits per second
+  Serial.begin(115200);
+
+  // Set up the LCD's number of columns and rows
+  lcd.begin(16, 2);
+  lcd.print("TempLCD Init");
+  delay(2000);
+  lcd.clear();
+
+  // Initialize button pins as inputs with pull-up resistors
+  pinMode(buttonUp, INPUT_PULLUP);
+  pinMode(buttonLeft, INPUT_PULLUP);
+  pinMode(buttonRight, INPUT_PULLUP);
+  pinMode(buttonDown, INPUT_PULLUP);
+  pinMode(buttonMode1, INPUT_PULLUP);
+  pinMode(buttonMode2, INPUT_PULLUP);
+
+  Serial.println("Setup complete. Testing buttons...");
+}
+
+void loop() {
+  // Check for mode switching
+  if (digitalRead(buttonMode1) == LOW) {
+    currentMode = TEMPERATURE;
+    Serial.println("Switched to Temperature Mode");
+    delay(200); // Debounce delay
+  }
+  if (digitalRead(buttonMode2) == LOW) {
+    currentMode = MINIGAME;
+    Serial.println("Switched to Minigame Mode");
+    delay(200); // Debounce delay
+  }
+
+  if (currentMode == TEMPERATURE) {
+    displayTemperature();
+  } else if (currentMode == MINIGAME) {
+    playMinigame();
+  }
+}
+
+void displayTemperature() {
+  // Read the analog / millivolts value for pin 38
+  int analogVolts = analogReadMilliVolts(38);
+
+  // Calibration of the Thermistor model MCP9700/9700A
+  float temperatureC = (analogVolts - 500) / 10.0;
+  float temperatureF = ((temperatureC * 9) / 5) + 22; // +22 instead of +32 to calibrate the sensor to properly read the temperature (originally the temperature was about 10 degrees to high)
+  //This calibration error is most likely due to self heating of the sensor because of the 6uA power consumption.
+
+  // Print out the values you read to Serial Monitor
+  Serial.printf("\nTemperature: %.1fF", temperatureF);
+
+  // Display the temperature on the LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: ");
+  lcd.print(temperatureF);
+  lcd.print(" F");
+
+  // Wait for a second before reading again
+  delay(1000);
+}
+
+void playMinigame() {
+  // Check for button presses and update character position
+  if (digitalRead(buttonUp) == LOW) {
+    posY = max(posY - 1, 0);
+    Serial.println("UP pressed");
+    delay(200); // Debounce delay
+  }
+  if (digitalRead(buttonLeft) == LOW) {
+    posX = max(posX - 1, 0);
+    Serial.println("LEFT pressed");
+    delay(200); // Debounce delay
+  }
+  if (digitalRead(buttonRight) == LOW) {
+    posX = min(posX + 1, 15);
+    Serial.println("RIGHT pressed");
+    delay(200); // Debounce delay
+  }
+  if (digitalRead(buttonDown) == LOW) {
+    posY = min(posY + 1, 1);
+    Serial.println("DOWN pressed");
+    delay(200); // Debounce delay
+  }
+
+  // Clear the LCD and display the character at the new position
+  lcd.clear();
+  lcd.setCursor(posX, posY);
+  lcd.write(0xFF); // Full block character
+
+  // Wait before the next loop iteration
+  delay(100);
+}
