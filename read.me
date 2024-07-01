@@ -1,0 +1,43 @@
+Project Overview
+This project aims to emulate old-school video game consoles on a 16x2 LCD display. The LCD display consists of characters made up of 5x8 pixel grids, resulting in a total resolution of 80x16 pixels. This resolution is similar to early video game consoles and handheld games, making it ideal for adapting simple games.
+
+Target Consoles
+Game Boy
+
+Original resolution: 160x144 pixels
+Adaptation: Simplify game graphics to fit within the 80x16 pixel resolution.
+Tiger Electronics Handheld Games
+
+Known for their low-resolution segmented displays.
+Adaptation: Convert graphics to a monochrome pixel art style suitable for the 16x2 LCD.
+Microvision
+
+Resolution: 16x16 pixels
+Adaptation: Games can be directly implemented due to the similar pixel count.
+Game Implementation Ideas
+Simplify Graphics
+Convert the game graphics to a simple monochrome pixel art style that fits within the 80x16 pixel resolution.
+
+Tile-Based Games
+Focus on tile-based games like Tetris or Snake, which can be easily adapted to a grid-like structure.
+
+Scrolling Display
+Implement horizontal or vertical scrolling to simulate a larger playfield.
+
+Example Game: Snake
+Conceptual Outline
+Initialize the LCD
+
+Set up the LCD to handle the 5x8 pixel characters.
+Display Grid
+
+Use the character positions to display the game grid.
+Snake Movement
+
+Implement button controls to move the snake up, down, left, and right.
+Collision Detection
+
+Detect collisions with the walls or the snake's own body.
+Food Items
+
+Place food items on the grid for the snake to eat and grow.
